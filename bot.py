@@ -402,6 +402,57 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     return CHOOSING_ACTION
 
+async def show_user_history(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    db = load_db()
+    u_id_str = str(user.id)
+    u_data = db.get("users", {}).get(u_id_str, {})
+
+    balance = u_data.get("balance", 0.0)
+    total_earned = u_data.get("total_earned", 0.0)
+    total_withdrawn = u_data.get("total_withdrawn", 0.0)
+
+    # Filter user's withdrawal requests
+    user_wds = [w for w in db.get("withdraws", []) if str(w.get("user_id")) == str(user.id)]
+    user_wds.reverse()  # Show newest first
+
+    wd_history_text = ""
+    if user_wds:
+        wd_history_text += "📜 **RECENT WITHDRAWAL HISTORY:**\n━━━━━━━━━━━━━━━━━━━━\n"
+        for wd in user_wds[:7]:
+            st = wd.get("status", "Pending")
+            st_icon = "⏳ Pending" if st == "Pending" else ("✅ Approved" if st == "Approved" else "❌ Rejected")
+            wd_history_text += (
+                f"🔹 **Payout #{wd.get('id')}** | {wd.get('method')} (`{wd.get('number')}`)\n"
+                f"   💰 Amount: **৳{wd.get('amount', 0.0):.2f}** | Status: **{st_icon}**\n"
+                f"   📅 Date: `{wd.get('date', 'N/A')}`\n\n"
+            )
+    else:
+        wd_history_text += "📜 **WITHDRAWAL HISTORY:**\n━━━━━━━━━━━━━━━━━━━━\nℹ️ আপনার এখনো কোনো পেমেন্ট/উইথড্রল রেকর্ড তৈরি হয়নি।\n\n"
+
+    history_msg = (
+        f"📊 **WORK & WITHDRAWAL STATEMENT**\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"👤 **User Name:** {user.full_name}\n"
+        f"🆔 **Telegram ID:** `{user.id}`\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"💰 **বর্তমান ব্যালেন্স:** ৳{balance:.2f}\n"
+        f"💵 **সর্বমোট আয় (Total Earned):** ৳{total_earned:.2f}\n"
+        f"💸 **সর্বমোট উইথড্র (Total Withdrawn):** ৳{total_withdrawn:.2f}\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"{wd_history_text}"
+    )
+
+    keyboard = [[InlineKeyboardButton("🔙 Back to Main Menu", callback_data="cancel_action", api_kwargs={"style": "danger"})]]
+
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.message.reply_text(history_msg, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+    elif update.message:
+        await update.message.reply_text(history_msg, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+
+    return CHOOSING_ACTION
+
 
 # ================= TEXT & BUTTON ROUTER =================
 async def handle_menu_clicks(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -246,12 +246,12 @@ async def verify_channel_join_callback(update: Update, context: ContextTypes.DEF
 # ================= KEYBOARDS =================
 def main_menu_keyboard(is_admin=False):
     keyboard = [
-        [KeyboardButton("📁 Send File")],
-        [KeyboardButton("👤 My Profile")],
-        [KeyboardButton("💳 Withdraw"), KeyboardButton("ℹ️ Help & Links")]
+        [KeyboardButton("📁 Send File", api_kwargs={"style": "success"})],
+        [KeyboardButton("👤 My Profile", api_kwargs={"style": "primary"})],
+        [KeyboardButton("💳 Withdraw", api_kwargs={"style": "danger"}), KeyboardButton("ℹ️ Help & Links", api_kwargs={"style": "primary"})]
     ]
     if is_admin:
-        keyboard.append([KeyboardButton("⚙️ Admin Panel")])
+        keyboard.append([KeyboardButton("⚙️ Admin Panel", api_kwargs={"style": "primary"})])
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
 def admin_reply_keyboard():
@@ -264,14 +264,14 @@ def admin_reply_keyboard():
     nagad_st = "🟢 ON" if db["settings"].get("nagad_active", True) else "🔴 OFF"
     
     keyboard = [
-        [KeyboardButton("📊 Bot Stats"), KeyboardButton("👤 Manage Users")],
-        [KeyboardButton("📋 User File Report"), KeyboardButton("🛠️ Manage Services")],
-        [KeyboardButton("➕ Add New Service"), KeyboardButton(f"💳 Min Withdraw [{min_wd:.0f}]")],
-        [KeyboardButton(f"📱 bKash [{bkash_st}]"), KeyboardButton(f"📱 Nagad [{nagad_st}]")],
-        [KeyboardButton(f"⏰ Work Time: [{s_time} - {e_time}]"), KeyboardButton(f"⚙️ Maintenance [{m_status}]")],
-        [KeyboardButton("📥 Pending Withdraws"), KeyboardButton("🚫 Banned Users")],
-        [KeyboardButton("🔗 Link Settings"), KeyboardButton("📁 Backup Data")],
-        [KeyboardButton("📢 Broadcast Message"), KeyboardButton("🔙 Main Menu")]
+        [KeyboardButton("📊 Bot Stats", api_kwargs={"style": "primary"}), KeyboardButton("👤 Manage Users", api_kwargs={"style": "primary"})],
+        [KeyboardButton("📋 User File Report", api_kwargs={"style": "primary"}), KeyboardButton("🛠️ Manage Services", api_kwargs={"style": "primary"})],
+        [KeyboardButton("➕ Add New Service", api_kwargs={"style": "success"}), KeyboardButton(f"💳 Min Withdraw [{min_wd:.0f}]", api_kwargs={"style": "danger"})],
+        [KeyboardButton(f"📱 bKash [{bkash_st}]", api_kwargs={"style": "success"}), KeyboardButton(f"📱 Nagad [{nagad_st}]", api_kwargs={"style": "success"})],
+        [KeyboardButton(f"⏰ Work Time: [{s_time} - {e_time}]", api_kwargs={"style": "primary"}), KeyboardButton(f"⚙️ Maintenance [{m_status}]", api_kwargs={"style": "danger"})],
+        [KeyboardButton("📥 Pending Withdraws", api_kwargs={"style": "danger"}), KeyboardButton("🚫 Banned Users", api_kwargs={"style": "danger"})],
+        [KeyboardButton("🔗 Link Settings", api_kwargs={"style": "primary"}), KeyboardButton("📁 Backup Data", api_kwargs={"style": "success"})],
+        [KeyboardButton("📢 Broadcast Message", api_kwargs={"style": "primary"}), KeyboardButton("🔙 Main Menu", api_kwargs={"style": "danger"})]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
@@ -286,36 +286,36 @@ def admin_panel_keyboard():
     
     keyboard = [
         [
-            InlineKeyboardButton("📊 Bot Stats", callback_data="adm_stats"),
-            InlineKeyboardButton("👤 Manage Users", callback_data="adm_manage_users")
+            InlineKeyboardButton("📊 Bot Stats", callback_data="adm_stats", api_kwargs={"style": "primary"}),
+            InlineKeyboardButton("👤 Manage Users", callback_data="adm_manage_users", api_kwargs={"style": "primary"})
         ],
         [
-            InlineKeyboardButton("📋 User File Report", callback_data="adm_report"),
-            InlineKeyboardButton("🛠️ Manage Services", callback_data="adm_manage_services")
+            InlineKeyboardButton("📋 User File Report", callback_data="adm_report", api_kwargs={"style": "primary"}),
+            InlineKeyboardButton("🛠️ Manage Services", callback_data="adm_manage_services", api_kwargs={"style": "primary"})
         ],
         [
-            InlineKeyboardButton("➕ Add New Service", callback_data="adm_add_service"),
-            InlineKeyboardButton(f"💳 Min Withdraw: ৳{min_wd:.0f}", callback_data="adm_min_wd")
+            InlineKeyboardButton("➕ Add New Service", callback_data="adm_add_service", api_kwargs={"style": "success"}),
+            InlineKeyboardButton(f"💳 Min Withdraw: ৳{min_wd:.0f}", callback_data="adm_min_wd", api_kwargs={"style": "danger"})
         ],
         [
-            InlineKeyboardButton(f"📱 bKash: [{bkash_st}]", callback_data="adm_toggle_bkash"),
-            InlineKeyboardButton(f"📱 Nagad: [{nagad_st}]", callback_data="adm_toggle_nagad")
+            InlineKeyboardButton(f"📱 bKash: [{bkash_st}]", callback_data="adm_toggle_bkash", api_kwargs={"style": "success"}),
+            InlineKeyboardButton(f"📱 Nagad: [{nagad_st}]", callback_data="adm_toggle_nagad", api_kwargs={"style": "success"})
         ],
         [
-            InlineKeyboardButton(f"⏰ Work Time: [{s_time} - {e_time}]", callback_data="adm_work_time_menu"),
-            InlineKeyboardButton(f"⚙️ Maintenance Mode: [{m_status}]", callback_data="adm_maintenance")
+            InlineKeyboardButton(f"⏰ Work Time: [{s_time} - {e_time}]", callback_data="adm_work_time_menu", api_kwargs={"style": "primary"}),
+            InlineKeyboardButton(f"⚙️ Maintenance Mode: [{m_status}]", callback_data="adm_maintenance", api_kwargs={"style": "danger"})
         ],
         [
-            InlineKeyboardButton("📥 Pending Withdraws", callback_data="adm_pending_wd"),
-            InlineKeyboardButton("🚫 Banned Users", callback_data="adm_banned_list")
+            InlineKeyboardButton("📥 Pending Withdraws", callback_data="adm_pending_wd", api_kwargs={"style": "danger"}),
+            InlineKeyboardButton("🚫 Banned Users", callback_data="adm_banned_list", api_kwargs={"style": "danger"})
         ],
         [
-            InlineKeyboardButton("🔗 Link Settings", callback_data="adm_link_settings"),
-            InlineKeyboardButton("📁 Backup Data", callback_data="adm_backup_data")
+            InlineKeyboardButton("🔗 Link Settings", callback_data="adm_link_settings", api_kwargs={"style": "primary"}),
+            InlineKeyboardButton("📁 Backup Data", callback_data="adm_backup_data", api_kwargs={"style": "success"})
         ],
         [
-            InlineKeyboardButton("📢 Broadcast Message", callback_data="adm_broadcast"),
-            InlineKeyboardButton("🔙 Main Menu", callback_data="adm_main")
+            InlineKeyboardButton("📢 Broadcast Message", callback_data="adm_broadcast", api_kwargs={"style": "primary"}),
+            InlineKeyboardButton("🔙 Main Menu", callback_data="adm_main", api_kwargs={"style": "danger"})
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -325,7 +325,7 @@ def admin_panel_keyboard():
 
 def cancel_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("❌ Cancel / 🔙 Main Menu", callback_data="cancel_action")]
+        [InlineKeyboardButton("❌ Cancel / 🔙 Main Menu", callback_data="cancel_action", api_kwargs={"style": "danger"})]
     ])
 
 
@@ -484,11 +484,11 @@ async def handle_menu_clicks(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         keyboard = [
             [
-                InlineKeyboardButton("✏️ Edit Saved Number", callback_data="prof_edit_num"),
-                InlineKeyboardButton("📋 Today's Rates", callback_data="prof_today_price")
+                InlineKeyboardButton("✏️ Edit Saved Number", callback_data="prof_edit_num", api_kwargs={"style": "success"}),
+                InlineKeyboardButton("📋 Today's Rates", callback_data="prof_today_price", api_kwargs={"style": "primary"})
             ],
             [
-                InlineKeyboardButton("📜 Work & Withdraw History", callback_data="prof_history")
+                InlineKeyboardButton("📜 Work & Withdraw History", callback_data="prof_history", api_kwargs={"style": "primary"})
             ]
         ]
         await update.message.reply_text(profile_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
@@ -515,11 +515,11 @@ async def handle_menu_clicks(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
         row = []
         if bkash_active:
-            row.append(InlineKeyboardButton("📱 bKash", callback_data="wd_method_bkash"))
+            row.append(InlineKeyboardButton("📱 bKash", callback_data="wd_method_bkash", api_kwargs={"style": "success"}))
         if nagad_active:
-            row.append(InlineKeyboardButton("📱 Nagad", callback_data="wd_method_nagad"))
+            row.append(InlineKeyboardButton("📱 Nagad", callback_data="wd_method_nagad", api_kwargs={"style": "success"}))
 
-        keyboard = [row, [InlineKeyboardButton("🔙 Main Menu", callback_data="cancel_action")]]
+        keyboard = [row, [InlineKeyboardButton("🔙 Main Menu", callback_data="cancel_action", api_kwargs={"style": "danger"})]]
         await update.message.reply_text(
             f"💸 **WITHDRAW REQUEST**\n\n"
             f"💰 বর্তমান ব্যালেন্স: ৳{balance:.2f}\n"
@@ -565,9 +565,9 @@ async def handle_menu_clicks(update: Update, context: ContextTypes.DEFAULT_TYPE)
             "━━━━━━━━━━━━━━━━━━━━"
         )
         keyboard = [
-            [InlineKeyboardButton("📖 Video Tutorial", url=tut_link), InlineKeyboardButton("🧾 Payment Proofs", url=proof_url)],
-            [InlineKeyboardButton("💬 Admin Support", url=supp_link), InlineKeyboardButton("📢 Notice Channel", url=notice_link)],
-            [InlineKeyboardButton("📜 Terms & Rules", callback_data="user_rules")]
+            [InlineKeyboardButton("📖 Video Tutorial", url=tut_link, api_kwargs={"style": "primary"}), InlineKeyboardButton("🧾 Payment Proofs", url=proof_url, api_kwargs={"style": "success"})],
+            [InlineKeyboardButton("💬 Admin Support", url=supp_link, api_kwargs={"style": "primary"}), InlineKeyboardButton("📢 Notice Channel", url=notice_link, api_kwargs={"style": "primary"})],
+            [InlineKeyboardButton("📜 Terms & Rules", callback_data="user_rules", api_kwargs={"style": "primary"})]
         ]
         await update.message.reply_text(info_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
@@ -615,7 +615,7 @@ async def handle_menu_clicks(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return await send_database_backup(update, context)
 
 
-    elif text == "⚙️ Admin Panel" and user.id == ADMIN_ID:
+    elif ("Admin Panel" in text or text == "/admin") and user.id == ADMIN_ID:
         await update.message.reply_text("⚙️ **ADMIN CONTROL PANEL**", reply_markup=admin_reply_keyboard(), parse_mode="Markdown")
         await update.message.reply_text("ইনলাইন মেনু বিকল্প:", reply_markup=admin_panel_keyboard())
 
@@ -743,8 +743,8 @@ async def receive_user_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     rcv_markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("⚡ ✅ ACCEPT & PAY", callback_data=f"rcv_done_{user.id}"),
-            InlineKeyboardButton("⚠️ 📝 REPORT ISSUE", callback_data=f"quick_rep_{user.id}")
+            InlineKeyboardButton("⚡ ✅ ACCEPT & PAY", callback_data=f"rcv_done_{user.id}", api_kwargs={"style": "success"}),
+            InlineKeyboardButton("⚠️ 📝 REPORT ISSUE", callback_data=f"quick_rep_{user.id}", api_kwargs={"style": "danger"})
         ]
     ])
     
@@ -953,8 +953,8 @@ async def receive_withdraw_amount(update: Update, context: ContextTypes.DEFAULT_
     )
     admin_markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("💸 ✅ APPROVE PAYOUT", callback_data=f"wd_approve_{user.id}_{amount}_{req_id}"),
-            InlineKeyboardButton("❌ REJECT & REFUND", callback_data=f"wd_reject_{user.id}_{amount}_{req_id}")
+            InlineKeyboardButton("💸 ✅ APPROVE PAYOUT", callback_data=f"wd_approve_{user.id}_{amount}_{req_id}", api_kwargs={"style": "success"}),
+            InlineKeyboardButton("❌ REJECT & REFUND", callback_data=f"wd_reject_{user.id}_{amount}_{req_id}", api_kwargs={"style": "danger"})
         ]
     ])
 
@@ -1843,11 +1843,11 @@ async def show_link_settings(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
     keyboard = [
-        [InlineKeyboardButton("✏️ Edit Notice Channel", callback_data="set_link_notice")],
-        [InlineKeyboardButton("✏️ Edit Tutorial Link", callback_data="set_link_tutorial")],
-        [InlineKeyboardButton("✏️ Edit Admin Support", callback_data="set_link_support")],
-        [InlineKeyboardButton("✏️ Edit Proof Link", callback_data="set_link_proof")],
-        [InlineKeyboardButton("🔙 Main Menu", callback_data="adm_main")]
+        [InlineKeyboardButton("✏️ Edit Notice Channel", callback_data="set_link_notice", api_kwargs={"style": "primary"})],
+        [InlineKeyboardButton("✏️ Edit Tutorial Link", callback_data="set_link_tutorial", api_kwargs={"style": "primary"})],
+        [InlineKeyboardButton("✏️ Edit Admin Support", callback_data="set_link_support", api_kwargs={"style": "primary"})],
+        [InlineKeyboardButton("✏️ Edit Proof Link", callback_data="set_link_proof", api_kwargs={"style": "success"})],
+        [InlineKeyboardButton("🔙 Main Menu", callback_data="adm_main", api_kwargs={"style": "danger"})]
     ]
     markup = InlineKeyboardMarkup(keyboard)
 
@@ -2326,6 +2326,15 @@ async def profile_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "prof_history":
         return await show_user_history(update, context)
 
+async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user.id != ADMIN_ID:
+        await update.message.reply_text("⛔ আপনি এই বটের অ্যাডমিন নন!")
+        return CHOOSING_ACTION
+    await update.message.reply_text("⚙️ **ADMIN CONTROL PANEL**", reply_markup=admin_reply_keyboard(), parse_mode="Markdown")
+    await update.message.reply_text("ইনলাইন মেনু বিকল্প:", reply_markup=admin_panel_keyboard())
+    return CHOOSING_ACTION
+
 # ================= MAIN APPLICATION SETUP =================
 def main():
     print("🤖 Starting Telegram Bot...")
@@ -2336,6 +2345,7 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[
             CommandHandler("start", start),
+            CommandHandler("admin", admin_command),
             CommandHandler("cancel", cancel)
         ],
         states={
@@ -2445,6 +2455,7 @@ def main():
         },
         fallbacks=[
             CommandHandler("start", start),
+            CommandHandler("admin", admin_command),
             CommandHandler("cancel", cancel),
             CallbackQueryHandler(cancel, pattern="^cancel_action$")
         ]

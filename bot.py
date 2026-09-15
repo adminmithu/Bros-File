@@ -82,7 +82,21 @@ def start_health_check_server():
 
 # ================= CONFIGURATION & FILES =================
 TOKEN = os.getenv("BOT_TOKEN", "8963161658:AAGwS2BtEcHKMle258Mk9TW1THP1DB12gYY")
-ADMIN_ID = int(os.getenv("ADMIN_ID", "8929349073"))
+PRIMARY_ADMIN_ID = 8929349073
+try:
+    ENV_ADMIN_ID = int(os.getenv("ADMIN_ID", "8929349073"))
+except Exception:
+    ENV_ADMIN_ID = PRIMARY_ADMIN_ID
+
+ADMIN_IDS = {PRIMARY_ADMIN_ID, ENV_ADMIN_ID}
+ADMIN_ID = PRIMARY_ADMIN_ID
+
+def is_admin_user(uid):
+    try:
+        return int(uid) in ADMIN_IDS
+    except Exception:
+        return False
+
 ADMIN_GROUP_ID = int(os.getenv("ADMIN_GROUP_ID", "-1003955316409"))
 NOTICE_CHANNEL = os.getenv("NOTICE_CHANNEL", "@socialworkerfile")
 TUTORIAL_LINK = os.getenv("TUTORIAL_LINK", "https://t.me/socialworkerfile")
@@ -361,7 +375,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🛠️ সিস্টেমের মেইনটেন্যান্স কাজ চলছে! কিছুক্ষণ পর চেষ্টা করুন।")
         return CHOOSING_ACTION
 
-    is_admin = (user.id == ADMIN_ID)
+    is_admin = is_admin_user(user.id)
     await update.message.reply_text(
         f"স্বাগতম, **{user.full_name}**!\nআপনার কাজের জন্য নিচের মেনু থেকে অপশন বেছে নিন:",
         reply_markup=main_menu_keyboard(is_admin),
@@ -371,7 +385,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    is_admin = (user.id == ADMIN_ID)
+    is_admin = is_admin_user(user.id)
     
     if update.callback_query:
         await update.callback_query.answer()
@@ -605,19 +619,18 @@ async def handle_menu_clicks(update: Update, context: ContextTypes.DEFAULT_TYPE)
         keyboard = [[InlineKeyboardButton("🧾 View Payment Proofs", url=proof_url)]]
         await update.message.reply_text("🧾 আমাদের সকল সফল পেমেন্টের প্রুফ দেখতে নিচের বাটনে ক্লিক করুন:", reply_markup=InlineKeyboardMarkup(keyboard))
 
-    elif text.startswith("🚫 Banned Users") and user.id == ADMIN_ID:
+    elif text.startswith("🚫 Banned Users") and is_admin_user(user.id):
         return await show_banned_users_list(update, context)
 
-    elif text.startswith("🔗 Link Settings") and user.id == ADMIN_ID:
+    elif text.startswith("🔗 Link Settings") and is_admin_user(user.id):
         return await show_link_settings(update, context)
 
-    elif text.startswith("📁 Backup Data") and user.id == ADMIN_ID:
+    elif text.startswith("📁 Backup Data") and is_admin_user(user.id):
         return await send_database_backup(update, context)
 
 
-    elif ("Admin Panel" in text or text == "/admin") and user.id == ADMIN_ID:
-        await update.message.reply_text("⚙️ **ADMIN CONTROL PANEL**", reply_markup=admin_reply_keyboard(), parse_mode="Markdown")
-        await update.message.reply_text("ইনলাইন মেনু বিকল্প:", reply_markup=admin_panel_keyboard())
+    elif ("Admin Panel" in text or text == "/admin") and is_admin_user(user.id):
+        await update.message.reply_text("⚙️ **ADMIN CONTROL PANEL**\n\nনিচের মেনু থেকে আপনার কাঙ্ক্ষিত অ্যাডমিন অপশনটি সিলেক্ট করুন:", reply_markup=admin_reply_keyboard(), parse_mode="Markdown")
 
     elif text.startswith("📱 bKash") and user.id == ADMIN_ID:
         db["settings"]["bkash_active"] = not db["settings"].get("bkash_active", True)
@@ -708,9 +721,67 @@ async def select_service_for_submission(update: Update, context: ContextTypes.DE
     if query.data.startswith("send_srv_"):
         srv_key = query.data.replace("send_srv_", "")
         context.user_data["selected_service"] = srv_key
+        keyboard = [
+            [
+                InlineKeyboardButton("📄 Notepad (.txt)", callback_data="send_fmt_txt", api_kwargs={"style": "primary"}),
+                InlineKeyboardButton("📊 Excel (.xlsx)", callback_data="send_fmt_xlsx", api_kwargs={"style": "success"})
+            ],
+            [
+                InlineKeyboardButton("🔗 Direct Text / Sheet Link", callback_data="send_fmt_link", api_kwargs={"style": "primary"})
+            ],
+            [
+                InlineKeyboardButton("🔙 Main Menu", callback_data="cancel_action", api_kwargs={"style": "danger"})
+            ]
+        ]
+        msg_prompt = (
+            f"📂 **SERVICE: {srv_key.upper()}**\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"📌 **কাজের ফাইল ফরম্যাট বেছে নিন:**\n\n"
+            f"১. 📄 **.txt File:** নোটপ্যাড ফাইল পাঠাতে এটি সিলেক্ট করুন।\n"
+            f"২. 📊 **.xlsx File:** এক্সেল শিট ফাইল পাঠাতে এটি সিলেক্ট করুন।\n"
+            f"৩. 🔗 **Text / Link:** চ্যাটে আইডি তালিকা বা শিট লিংক পাঠাতে সিলেক্ট করুন।"
+        )
         await query.message.edit_text(
-            f"✅ আপনি **{srv_key.upper()}** সিলেক্ট করেছেন।\n\n"
-            f"📥 এখন আপনার ফাইল (Document) অথবা গুগল শিট লিংক পাঠান:",
+            msg_prompt,
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return SUBMIT_FILE
+
+async def select_format_for_submission(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "cancel_action":
+        return await cancel(update, context)
+
+    if query.data.startswith("send_fmt_"):
+        fmt_key = query.data.replace("send_fmt_", "")
+        context.user_data["selected_format"] = fmt_key
+        srv_key = context.user_data.get("selected_service", "general").upper()
+
+        if fmt_key == "txt":
+            fmt_desc = "📄 **NOTEPAD FILE (.txt)**"
+            rule_desc = "⚠️ **STRICT RULE:** আপনাকে অবশ্যই একটি **.txt** নোটপ্যাড ফাইল আপলোড করতে হবে। ভুল ফরম্যাট দিলে বট গ্রহণ করবে না।"
+            input_prompt = "📥 **এখন আপনার .txt ফাইলটি আপলোড করুন:**"
+        elif fmt_key == "xlsx":
+            fmt_desc = "📊 **EXCEL FILE (.xlsx / .xls)**"
+            rule_desc = "⚠️ **STRICT RULE:** আপনাকে অবশ্যই **.xlsx / .xls** এক্সেল ফাইল আপলোড করতে হবে। ভুল ফরম্যাট দিলে বট গ্রহণ করবে না।"
+            input_prompt = "📥 **এখন আপনার Excel (.xlsx) ফাইলটি আপলোড করুন:**"
+        else:
+            fmt_desc = "🔗 **DIRECT TEXT / SHEET LINK**"
+            rule_desc = "⚠️ **STRICT RULE:** চ্যাটে সরাসরি টেক্সট/আইডি তালিকা বা শিট লিংক লিখুন। কোনো ফাইল আপলোড করবেন না।"
+            input_prompt = "📥 **এখন আপনার আইডি তালিকা বা গুগল শিট লিংক লিখে পাঠান:**"
+
+        msg_prompt = (
+            f"📂 **SERVICE:** {srv_key}\n"
+            f"📌 **SELECTED FORMAT:** {fmt_desc}\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"{rule_desc}\n\n"
+            f"{input_prompt}"
+        )
+        await query.message.edit_text(
+            msg_prompt,
             parse_mode="Markdown",
             reply_markup=cancel_keyboard()
         )
@@ -729,13 +800,60 @@ async def receive_user_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = load_db()
     srv_info = db.get("services", {}).get(srv_key, {})
     srv_rate = srv_info.get("rate", 0.0)
-    
+
+    req_fmt = context.user_data.get("selected_format", "txt")
+    is_doc = bool(update.message.document)
+    doc_name = (update.message.document.file_name or "").lower() if is_doc else ""
+
+    # Strict Format Verification
+    if req_fmt == "txt":
+        if not is_doc or not doc_name.endswith(".txt"):
+            err_msg = (
+                f"❌ **INVALID FILE FORMAT! (ভুল ফাইল পাঠানো হয়েছে)**\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"📌 আপনি সিলেক্ট করেছেন: **📄 Notepad (.txt) File**\n"
+                f"⛔ আপনি পাঠিয়েছেন: **ভুল ফাইল ফরম্যাট / লিংক!**\n\n"
+                f"⚠️ **STRICT RULE:** আপনাকে অবশ্যই একটি **.txt** নোটপ্যাড ফাইল আপলোড করতে হবে।"
+            )
+            await update.message.reply_text(err_msg, parse_mode="Markdown", reply_markup=cancel_keyboard())
+            return SUBMIT_FILE
+        file_type = "TEXT FILE (.txt)"
+
+    elif req_fmt == "xlsx":
+        if not is_doc or not doc_name.endswith((".xlsx", ".xls")):
+            err_msg = (
+                f"❌ **INVALID FILE FORMAT! (ভুল ফাইল পাঠানো হয়েছে)**\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"📌 আপনি সিলেক্ট করেছেন: **📊 Excel (.xlsx / .xls) File**\n"
+                f"⛔ আপনি পাঠিয়েছেন: **ভুল ফাইল ফরম্যাট / লিংক!**\n\n"
+                f"⚠️ **STRICT RULE:** আপনাকে অবশ্যই **.xlsx / .xls** এক্সেল ফাইল আপলোড করতে হবে।"
+            )
+            await update.message.reply_text(err_msg, parse_mode="Markdown", reply_markup=cancel_keyboard())
+            return SUBMIT_FILE
+        file_type = "EXCEL FILE (.xlsx)"
+
+    elif req_fmt == "link":
+        if is_doc:
+            err_msg = (
+                f"❌ **INVALID FILE FORMAT! (ভুল ফরম্যাট পাঠিয়েছেন)**\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"📌 আপনি সিলেক্ট করেছেন: **🔗 Direct Text / Link**\n"
+                f"⛔ আপনি পাঠিয়েছেন: **ডকুমেন্ট ফাইল!**\n\n"
+                f"⚠️ **STRICT RULE:** চ্যাটে ফাইল না পাঠিয়ে সরাসরি আইডি তালিকা বা শিট লিংক টাইপ করে পাঠান।"
+            )
+            await update.message.reply_text(err_msg, parse_mode="Markdown", reply_markup=cancel_keyboard())
+            return SUBMIT_FILE
+        file_type = "DIRECT TEXT / LINK"
+    else:
+        file_type = "GENERAL SUBMISSION"
+
     forward_text = (
         f"💎 **PREMIUM WORK SUBMISSION**\n"
         f"━━━━━━━━━━━━━━━━━━━━━━━\n"
         f"👤 **Worker Name:** {user.full_name}\n"
         f"🆔 **Telegram ID:** `{user.id}`\n"
         f"📂 **Service Type:** `{srv_key.upper()}`\n"
+        f"📑 **File Format:** `{file_type}`\n"
         f"💰 **Service Rate:** `৳{srv_rate:.2f} / ID`\n"
         f"📅 **Submitted At:** `{datetime.now().strftime('%d %b %Y | %I:%M %p')}`\n"
         f"━━━━━━━━━━━━━━━━━━━━━━━"
@@ -2328,7 +2446,7 @@ async def profile_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def admin_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    if user.id != ADMIN_ID:
+    if not is_admin_user(user.id):
         await update.message.reply_text("⛔ আপনি এই বটের অ্যাডমিন নন!")
         return CHOOSING_ACTION
     await update.message.reply_text("⚙️ **ADMIN CONTROL PANEL**", reply_markup=admin_reply_keyboard(), parse_mode="Markdown")

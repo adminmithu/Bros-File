@@ -1,0 +1,38 @@
+{
+    "users": {
+        "8929349073": {
+            "name": "Prime 99 🎭",
+            "username": "Prime90999",
+            "balance": 0.0,
+            "total_earned": 0.0,
+            "total_withdrawn": 0.0,
+            "saved_number": "Not Set",
+            "banned": false,
+            "ban_until": null
+        }
+    },
+    "services": {
+        "facebook": {
+            "name": "Facebook",
+            "rate": 10.0
+        },
+        "instagram": {
+            "name": "Instagram",
+            "rate": 12.0
+        }
+    },
+    "submissions": [],
+    "withdraws": [],
+    "settings": {
+        "maintenance": false,
+        "min_withdraw": 500.0,
+        "bkash_active": true,
+        "nagad_active": true,
+        "start_time": "06:00",
+        "end_time": "20:00",
+        "notice_channel": "@socialworkerfile",
+        "tutorial_link": "https://t.me/socialworkerfile",
+        "proof_link": "https://t.me/socialworkerfile",
+        "admin_username": "Prime90999"
+    }
+}

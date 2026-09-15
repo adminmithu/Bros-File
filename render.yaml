@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: telegram-file-sender-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_ID
+        sync: false
+      - key: ADMIN_GROUP_ID
+        sync: false
+      - key: NOTICE_CHANNEL
+        sync: false
+      - key: TUTORIAL_LINK
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false

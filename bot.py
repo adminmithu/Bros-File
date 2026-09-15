@@ -81,7 +81,7 @@ def start_health_check_server():
 
 
 # ================= CONFIGURATION & FILES =================
-TOKEN = os.getenv("BOT_TOKEN", "8906825796:AAHqkYvrSKSzpRv2A-8b1yMm1tGSfBYH348")
+TOKEN = os.getenv("BOT_TOKEN", "8963161658:AAGwS2BtEcHKMle258Mk9TW1THP1DB12gYY")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "8929349073"))
 ADMIN_GROUP_ID = int(os.getenv("ADMIN_GROUP_ID", "-1003955316409"))
 NOTICE_CHANNEL = os.getenv("NOTICE_CHANNEL", "@socialworkerfile")

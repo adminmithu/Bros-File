@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import threading
+import asyncio
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 from dotenv import load_dotenv
@@ -2461,7 +2462,13 @@ def main():
         print(f"🌐 Health check HTTP server running on port {port}")
 
     print("✅ Bot is running smoothly with your credentials...")
-    app.run_polling()
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    app.run_polling(close_loop=False)
 
 if __name__ == "__main__":
     main()
